@@ -9,9 +9,11 @@ for k=0:ch_length
 	tap = sqrt(sigma/2)*randn(1,1) + 1i*sqrt(sigma/2)*randn(1,1);
 	h(k+1) = tap;
 end
-
+E_tot = h * conj(h).';
+h_2 = h / sqrt(E_tot);
+E_2 = h_2 * conj(h_2).';
 Npx = length(h);
 M = 2^(ceil(log2(5*Npx)));			% n. of subcarriers
-in = randi(15,1,(M+Npx)*2^8);		% Input generation
+in = randi(16,1,(M+Npx)*2^8)-1;		% Input generation
 
-save('Input.mat','M','in','Npx','h');
+% save('Input.mat','M','in','Npx','h');

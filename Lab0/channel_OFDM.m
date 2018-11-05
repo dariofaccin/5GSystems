@@ -1,9 +1,8 @@
 clc; close all; clear global; clearvars;
 
 load('Input.mat');
-in_qam = qammod(in,16).';			% QAM modulation
-
-SNR_db_vect = 0:36;					% SNR vector (in dB)
+in_qam = qammod(in,16,'UnitAveragePower',true).';		% QAM modulation
+SNR_db_vect = 10;					% SNR vector (in dB)
 
 % a_pad = [in_qam; ones(M - mod(length(in_qam), M), 1) * (1+1i)];
 a_pad = in_qam;
@@ -16,8 +15,9 @@ r = reshape(A_matrix, [], 1);		% P/S converter
 
 in_filt = filter(h,1,r);	% Signal after passing the channel
 
-sigma_a = 4;				% Random number here, do computations
-E_tot = sum(h * conj(h).');
+sigma_a = var(in_qam);				% Random number here, do computations
+h = h ./ sqrt((h * conj(h).'));
+E_tot = h * conj(h).';
 
 Ser = zeros(length(SNR_db_vect),1);
 Ber = zeros(length(SNR_db_vect),1);
@@ -36,14 +36,14 @@ for i=1:length(SNR_db_vect)
 	K_i = 1./G;
 	y_matrix = x_k.*K_i;
 	rec = reshape(y_matrix,[],1);		% P/S converter
-	dec_bits = qamdemod(rec,16).';		% QAM demodulation
+	dec_bits = qamdemod(rec,16,'UnitAveragePower',true).';		% QAM demodulation
 	Ser(i) = length(find(in(1:length(dec_bits))~=dec_bits))/length(dec_bits);
 	Ber(i) = Ser(i)/log2(16);			% Bit error rate is SER / log2(cardinality)
 end
 
-figure();
-semilogy(SNR_db_vect,Ber);
-title('P_{bit} versus SNR \Lambda');
-grid on;
-xlabel('SNR \Lambda'); ylabel('P_{bit}');
-xlim([SNR_db_vect(1) SNR_db_vect(end)]); ylim([10^-4 10^-0.3010]);
+% figure();
+% semilogy(SNR_db_vect,Ser);
+% title('P_{symbol} versus SNR \Lambda');
+% grid on;
+% xlabel('SNR \Lambda'); ylabel('P_{bit}');
+% xlim([SNR_db_vect(1) SNR_db_vect(10)]);% ylim([10^-2 10^-0.3010]);
