@@ -22,7 +22,7 @@ for i=1:length(SNR_db_vect)
 		h = channel(22);
 		filt = filter(h,1,r);
 		E_tot = h * conj(h).';
-		sigma_w = sigma_a/M * E_tot / snr_lin;
+		sigma_w = sigma_a * E_tot / snr_lin;
 		noise_wgn = wgn(length(filt),1,10*log10(sigma_w),'complex');
 		filt = filt + noise_wgn;
 		b_matrix = reshape(filt, M+Npx, []);		% S/P converter
@@ -47,4 +47,4 @@ title('SER versus SNR \Lambda');
 grid on;
 legend('SER for OFDM');
 xlabel('SNR \Lambda'); ylabel('P_{s}');
-xlim([SNR_db_vect(1) SNR_db_vect(end)]); ylim([10^-7 10^-0.3010]);
+xlim([SNR_db_vect(1) SNR_db_vect(end)]); %ylim([10^-7 10^-0.3010]);
