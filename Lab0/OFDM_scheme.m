@@ -1,6 +1,20 @@
 clc; close all; clear global; clearvars;
+ch_length = 21;
+h = zeros(1,ch_length);
+alpha = (1-exp(-1/3))/(1-exp(-22/3));
 
-load('Input.mat','Npx','in','M');
+for k=0:ch_length
+	sigma = alpha * exp(-k/3);
+	tap = sqrt(sigma/2)*randn(1,1) + 1i*sqrt(sigma/2)*randn(1,1);
+	h(k+1) = tap;
+end
+E_tot = h * conj(h).';
+h_2 = h / sqrt(E_tot);
+E_2 = h_2 * conj(h_2).';
+Npx = length(h);
+M = 2^(ceil(log2(5*Npx)));			% n. of subcarriers
+in = randi(16,1,(M+Npx)*2^8)-1;		% Input generation
+
 in_qam = qammod(in,16,'UnitAveragePower',true).';		% QAM modulation
 SNR_db_vect = 0:10;					% SNR vector (in dB)
 sigma_a = var(in_qam);
@@ -40,11 +54,11 @@ for i=1:length(SNR_db_vect)
 end
 Ser_mean = mean(Ser,2);		% Compute mean by row
 
-%% NICE PLOTTING
+%% PLOT
 figure();
 semilogy(SNR_db_vect,Ser_mean,'Color','r');
 title('SER versus SNR \Lambda');
 grid on;
 legend('SER for OFDM');
 xlabel('SNR \Lambda'); ylabel('P_{s}');
-xlim([SNR_db_vect(1) SNR_db_vect(end)]); %ylim([10^-7 10^-0.3010]);
+xlim([SNR_db_vect(1) SNR_db_vect(end)]);
